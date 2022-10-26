@@ -5,6 +5,14 @@
     <div class="row justify-content-center">
       <div class="col-md-8">
         <div class="card">
+          <p>Cover:</p>
+          @if ($post->cover)
+              <img src="{{asset('storage/' . $post->cover)}}" class="img-fluid"/>
+          @else
+              <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
+                   class="img-thumbnail"
+                   style="width:75px;"/>
+          @endif
           <div class="card-header">{{ $post->title }}</div>
 
           <div class="card-body">

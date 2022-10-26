@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Post;
 use App\Category;
 use App\Tag;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -47,10 +48,14 @@ class PostController extends Controller
             'title' => 'required|max:255',
             'content' => 'required',
             'category_id' => 'nullable|exists:categories,id',
-            'tags.*' => 'exists:tags,id'
+            'tags.*' => 'exists:tags,id',
+            'image' => 'nullable|image'
         ]);
 
         $form_data = $request->all();
+
+        $img_path =  Storage::disk('public')->put('cover', $form_data['image']);
+        $form_data['cover'] = $img_path;
 
         $slugTmp = Str::slug($form_data['title']);
 
@@ -106,10 +111,19 @@ class PostController extends Controller
             'title' => 'required|max:255',
             'content' => 'required',
             'category_id' => 'nullable|exists:categories,id',
-            'tags.*' => 'exists:tags,id'
+            'tags.*' => 'exists:tags,id',
+            'image' => 'nullable|mimes:jpeg,bmp,png,git,svg'
         ]);
 
         $form_data = $request->all();
+
+        if (array_key_exists('image', $form_data)) {
+            if ($post->cover) {
+                Storage::delete($post->cover);
+            }
+            $img_path = Storage::put('cover', $form_data['image']);
+            $form_data['cover'] = $img_path;
+        }
 
         if ($post->title == $form_data['title']) {
             $slug = $post->slug;
@@ -143,5 +157,20 @@ class PostController extends Controller
     {
         $post->delete();
         return redirect()->route('admin.posts.index');
+
+    }
+
+    // Cancella immagine copertina
+    public function deleteCover(Post $post) {
+
+        if ($post->cover) {
+            Storage::delete($post->cover);
+        }
+
+        $post->cover = null;
+        $post->save();
+
+        return redirect()->route('admin.posts.edit', [ 'post' => $post->id])->with('status', 'Copertina cancellata');
+
     }
 }

@@ -9,8 +9,19 @@
 
           <div class="card-body">
 
-            <form action="{{ route('admin.posts.store') }}" method="post">
+            <form action="{{ route('admin.posts.store') }}" method="post" enctype="multipart/form-data">
               @csrf
+
+              <div class="row d-block p-2">
+                <label for="cover" class="d-block">Seleziona l'immagine di copertina</label>
+                <input type="file" name="image" id="cover" class="w-50 m-auto text-center"
+                       @error('image') is-invalid @enderror />
+                @error('image')
+                    <div class="alert-danger col-3 mx-auto my-3">
+                        {{ $message }}
+                    </div>
+                @enderror
+              </div>
 
               <div class="form-group">
                 <label>Titolo</label>
