@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Post;
 use App\Category;
+use App\Mail\SendPostCreatedMail;
 use App\Tag;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
@@ -67,11 +69,14 @@ class PostController extends Controller
 
         $form_data['slug'] = $slugTmp;
 
-        $new_post = new Post();
-        $new_post->fill($form_data);
-        $new_post->save();
-        $new_post->tags()->sync($form_data['tags']);
-        return redirect()->route('admin.posts.index');
+        $post = new Post();
+        $post->fill($form_data);
+        $post->save();
+        $post->tags()->sync($form_data['tags']);
+
+        Mail::to($request->user())->send(new SendPostCreatedMail($post));
+
+        return redirect()->route('admin.posts.index', $post);
     }
 
     /**
